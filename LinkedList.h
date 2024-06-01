@@ -35,7 +35,7 @@ private:
 	void delete_all(TreeNode* tn) {
 		if (tn != nullptr) {
 			delete_all(tn->left);
-			this->delete_all(tn->right);
+			delete_all(tn->right);
 			delete(tn);
 		}
 		else return;
@@ -44,7 +44,7 @@ private:
 	void insert_all(const TreeNode* tn) {
 		if (tn != nullptr) {
 			insert_all(tn->left);
-			this->insert(tn->key);
+			insert(tn->key);
 			insert_all(tn->right);
 		}
 		else return;
@@ -58,18 +58,18 @@ public:
 
 		TreeNode* iter = root;
 		while (true) {
-			if (key < iter->key) {
+			if (iter == nullptr) {
+				return false;
+			}
+			else if (key < iter->key) {
 				iter = iter->left;
-				continue;
 			}
 			else if (key > iter->key) {
 				iter = iter->right;
-				continue;
 			}
 			else if (key == iter->key) {
 				return true;
 			}
-			else return false;
 		}
 	}
 
@@ -126,7 +126,7 @@ public:
 		}
 
 		TreeNode* iter = root;
-		TreeNode* parent = nullptr;
+		TreeNode* parent = root;
 		while (true)
 		{
 			if (key == iter->key) {
@@ -167,7 +167,7 @@ public:
 					}
 					else child = iter->right;
 
-					if (key < parent->key) {
+					if (parent->key < key) {
 						parent->right = child;
 					}
 					else parent->left = child;
@@ -188,9 +188,14 @@ public:
 			}
 			else {
 				if (key < iter->key) {
+					parent = iter;
 					iter = iter->left;
 				}
-				else iter = iter->right;
+				else {
+					parent = iter;
+					iter = iter->right;
+				}
+				
 			}
 		}
 	}
@@ -203,12 +208,8 @@ public:
 	}
 
 	~SearchTree() {
-		if (length > 0) {
-			TreeNode* iter_ptr = this->root;
-			TreeNode* next_node;
-		}
+		delete_all(root);
 		root = nullptr;
-		length = 0;
 	}
 
 	SearchTree& operator=(const SearchTree& rhs) {
