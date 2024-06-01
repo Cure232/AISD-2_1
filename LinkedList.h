@@ -32,43 +32,26 @@ private:
 		else return;
 	}
 
+	void delete_all(TreeNode* tn) {
+		if (tn != nullptr) {
+			delete_all(tn->left);
+			this->delete_all(tn->right);
+			delete(tn);
+		}
+		else return;
+	}
+
+	void insert_all(const TreeNode* tn) {
+		if (tn != nullptr) {
+			insert_all(tn->left);
+			this->insert(tn->key);
+			insert_all(tn->right);
+		}
+		else return;
+	}
+
 public:
-	SearchTree() = default;
-
-	SearchTree(const SearchTree& st) {
-		length = st.length;
-		//push_tail(st);
-	}
-
-	SearchTree& operator=(const SearchTree& rhs) {
-		if (this == &rhs) {
-			return *this;
-		}
-
-		this->~SearchTree();
-
-		//this->push_tail(rhs);
-		return *this;
-	}
-
-	~SearchTree() {
-		if (length > 0) {
-			TreeNode* iter_ptr = this->root;
-			TreeNode* next_node;
-		}
-		root = nullptr;
-		length = 0;
-	}
-
-	int get_length() const {
-		return length;
-	}
-
-	void print_all() const {
-		print_all(this->root);
-	}
-
-	bool contains(const int& key) const{
+	bool contains(const int& key) const {
 		if (root == nullptr) {
 			return false;
 		}
@@ -95,7 +78,7 @@ public:
 			return false;
 		}
 
-		length +=1 ;
+		length += 1;
 		if (root == nullptr) {
 			root = new TreeNode(key);
 			return true;
@@ -104,7 +87,7 @@ public:
 		TreeNode* iter = root;
 		while (true)
 		{
-			if (key < iter->key){
+			if (key < iter->key) {
 				if (iter->left == nullptr)
 				{
 					TreeNode* new_tree_node = new TreeNode(key);
@@ -131,6 +114,12 @@ public:
 		}
 	}
 
+	void insert_all(int* arr, int n) {
+		for (int i = 0; i < n; i++) {
+			this->insert(arr[i]);
+		}
+	}
+
 	bool erase(const int& key) {
 		if (this->contains(key) == false) {
 			return false;
@@ -142,7 +131,7 @@ public:
 		{
 			if (key == iter->key) {
 				//2 child nodes
-				if (iter->left != nullptr && iter->right != nullptr){
+				if (iter->left != nullptr && iter->right != nullptr) {
 					TreeNode* to_delete = iter;
 
 					TreeNode* leaf_parent = iter;
@@ -163,7 +152,7 @@ public:
 						parent->right = iter;
 					}
 					else parent->left = iter;
-					
+
 					iter->left = to_delete->left;
 					iter->right = to_delete->right;
 
@@ -171,28 +160,31 @@ public:
 					return true;
 				}
 				//Only 1 child node
-				else if (iter->left != nullptr || iter->right != nullptr){ 
+				else if (iter->left != nullptr || iter->right != nullptr) {
 					TreeNode* child;
 					if (iter->left != nullptr) {
 						child = iter->left;
-					} else child = iter->right;
+					}
+					else child = iter->right;
 
 					if (key < parent->key) {
 						parent->right = child;
-					} else parent->left = child;
+					}
+					else parent->left = child;
 
 					delete(iter);
 					return true;
 				}
 				//Это лист, нет "дочерних" узлов
-				else { 
+				else {
 					if (key > parent->key) {
 						parent->right = nullptr;
 					}
 					else parent->left = nullptr;
 					delete(iter);
-					return true;
 				}
+				length -= 1;
+				return true;
 			}
 			else {
 				if (key < iter->key) {
@@ -201,5 +193,39 @@ public:
 				else iter = iter->right;
 			}
 		}
+	}
+
+	SearchTree() = default;
+
+	SearchTree(const SearchTree& st) {
+		length = st.length;
+		insert_all(st.root);
+	}
+
+	~SearchTree() {
+		if (length > 0) {
+			TreeNode* iter_ptr = this->root;
+			TreeNode* next_node;
+		}
+		root = nullptr;
+		length = 0;
+	}
+
+	SearchTree& operator=(const SearchTree& rhs) {
+		if (this == &rhs) {
+			return *this;
+		}
+
+		this->~SearchTree();
+		*this = SearchTree(rhs);
+		return *this;
+	}
+
+	int get_length() const {
+		return length;
+	}
+
+	void print_all() const {
+		print_all(this->root);
 	}
 };
