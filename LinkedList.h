@@ -91,13 +91,14 @@ public:
 	}
 
 	bool insert(const int& key) {
+		if (this->contains(key)) {
+			return false;
+		}
+
+		length +=1 ;
 		if (root == nullptr) {
 			root = new TreeNode(key);
 			return true;
-		}
-
-		if (this->contains(key)) {
-			return false;
 		}
 
 		TreeNode* iter = root;
@@ -108,6 +109,7 @@ public:
 				{
 					TreeNode* new_tree_node = new TreeNode(key);
 					iter->left = new_tree_node;
+					return true;
 				}
 				else {
 					iter = iter->left;
@@ -119,6 +121,7 @@ public:
 					{
 						TreeNode* new_tree_node = new TreeNode(key);
 						iter->right = new_tree_node;
+						return true;
 					}
 					else {
 						iter = iter->right;
@@ -128,9 +131,75 @@ public:
 		}
 	}
 
-
-
 	bool erase(const int& key) {
-		
+		if (this->contains(key) == false) {
+			return false;
+		}
+
+		TreeNode* iter = root;
+		TreeNode* parent = nullptr;
+		while (true)
+		{
+			if (key == iter->key) {
+				//2 child nodes
+				if (iter->left != nullptr && iter->right != nullptr){
+					TreeNode* to_delete = iter;
+
+					TreeNode* leaf_parent = iter;
+					iter = iter->right;
+					//Finding the element that stands directly next in ascending order
+					while (iter->left != nullptr)
+					{
+						leaf_parent = iter;
+						iter = iter->left;
+					}
+					//Checking if iter has right child node and handling this
+					if (iter->right != nullptr) {
+						leaf_parent->left = iter->right;
+						iter->right = nullptr;
+					}
+					//Inserting node in old one`s place
+					if (to_delete->key < parent->key) {
+						parent->right = iter;
+					}
+					else parent->left = iter;
+					
+					iter->left = to_delete->left;
+					iter->right = to_delete->right;
+
+					delete(to_delete);
+					return true;
+				}
+				//Only 1 child node
+				else if (iter->left != nullptr || iter->right != nullptr){ 
+					TreeNode* child;
+					if (iter->left != nullptr) {
+						child = iter->left;
+					} else child = iter->right;
+
+					if (key < parent->key) {
+						parent->right = child;
+					} else parent->left = child;
+
+					delete(iter);
+					return true;
+				}
+				//Это лист, нет "дочерних" узлов
+				else { 
+					if (key > parent->key) {
+						parent->right = nullptr;
+					}
+					else parent->left = nullptr;
+					delete(iter);
+					return true;
+				}
+			}
+			else {
+				if (key < iter->key) {
+					iter = iter->left;
+				}
+				else iter = iter->right;
+			}
+		}
 	}
 };
