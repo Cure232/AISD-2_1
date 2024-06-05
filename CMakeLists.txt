@@ -33,11 +33,10 @@ FetchContent_MakeAvailable(googletest)
 # Объявляем библиотеку
 add_library(main-v1 SHARED
     "include/SearchTree.h"
-    "AISD-2.cc")
+    "AISD-2.cpp")
 target_include_directories(main-v1 PUBLIC "include")
 
-# Объявляем тесты
-add_executable(main-v1-tests1
+add_executable(main-v1-tests
     "tests/Time_Tests.cc"
 )
-target_link_libraries(main-v1-tests1 main-v1 GTest::gtest_main)
+target_link_libraries(main-v1-tests main-v1 GTest::gtest_main)

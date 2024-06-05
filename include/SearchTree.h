@@ -177,7 +177,7 @@ namespace mysearchtree {
 						delete(iter);
 						return true;
 					}
-					//Это лист, нет "дочерних" узлов
+					//It is a leaft, no "child" nodes
 					else {
 						if (key > parent->key) {
 							parent->right = nullptr;
