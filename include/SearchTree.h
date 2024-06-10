@@ -177,7 +177,7 @@ namespace mysearchtree {
 						delete(iter);
 						return true;
 					}
-					//It is a leaft, no "child" nodes
+					//It is a leaf, no "child" nodes
 					else {
 						if (key > parent->key) {
 							parent->right = nullptr;
