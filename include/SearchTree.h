@@ -22,7 +22,7 @@ namespace mysearchtree {
 		};
 
 	private:
-		int length = 0;
+		int size = 0;
 		TreeNode* root = nullptr;
 
 		void print_all(const TreeNode* tn) const {
@@ -53,17 +53,12 @@ namespace mysearchtree {
 		}
 
 	public:
-		bool contains(const int& key) const {
-			if (root == nullptr) {
-				return false;
-			}
 
+		bool contains(const int& key) const {
 			TreeNode* iter = root;
-			while (true) {
-				if (iter == nullptr) {
-					return false;
-				}
-				else if (key < iter->key) {
+
+			while (iter != nullptr) {
+				if (key < iter->key) {
 					iter = iter->left;
 				}
 				else if (key > iter->key) {
@@ -73,47 +68,28 @@ namespace mysearchtree {
 					return true;
 				}
 			}
+			return false;
 		}
 
 		bool insert(const int& key) {
-			if (this->contains(key)) {
-				return false;
-			}
-
-			length += 1;
-			if (root == nullptr) {
-				root = new TreeNode(key);
-				return true;
-			}
-
 			TreeNode* iter = root;
-			while (true)
+
+			while (iter != nullptr)
 			{
 				if (key < iter->key) {
-					if (iter->left == nullptr)
-					{
-						TreeNode* new_tree_node = new TreeNode(key);
-						iter->left = new_tree_node;
-						return true;
-					}
-					else {
-						iter = iter->left;
-					}
+					iter = iter->left;
 				}
-				else {
-					if (key > iter->key) {
-						if (iter->right == nullptr)
-						{
-							TreeNode* new_tree_node = new TreeNode(key);
-							iter->right = new_tree_node;
-							return true;
-						}
-						else {
-							iter = iter->right;
-						}
-					}
+				else if (key > iter->key) {
+					iter = iter->right;
+				}
+				else if (key == iter->key) {
+					return false;
 				}
 			}
+
+			size += 1;
+			iter = new TreeNode(key);
+			return true;
 		}
 
 		void insert_all(int* arr, int n) {
@@ -123,13 +99,9 @@ namespace mysearchtree {
 		}
 
 		bool erase(const int& key) {
-			if (this->contains(key) == false) {
-				return false;
-			}
-
 			TreeNode* iter = root;
 			TreeNode* parent = root;
-			while (true)
+			while (iter != nullptr)
 			{
 				if (key == iter->key) {
 					//2 child nodes
@@ -185,7 +157,7 @@ namespace mysearchtree {
 						else parent->left = nullptr;
 						delete(iter);
 					}
-					length -= 1;
+					size -= 1;
 					return true;
 				}
 				else {
@@ -197,15 +169,15 @@ namespace mysearchtree {
 						parent = iter;
 						iter = iter->right;
 					}
-
 				}
 			}
+			return false;
 		}
 
 		SearchTree() = default;
 
 		SearchTree(const SearchTree& st) {
-			length = st.length;
+			size = st.size;
 			insert_all(st.root);
 		}
 
@@ -224,8 +196,8 @@ namespace mysearchtree {
 			return *this;
 		}
 
-		int get_length() const {
-			return length;
+		int get_size() const {
+			return size;
 		}
 
 		void print_all() const {
