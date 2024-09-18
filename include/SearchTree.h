@@ -12,12 +12,14 @@ namespace mysearchtree {
 		struct TreeNode {
 			TreeNode* left;
 			TreeNode* right;
+			TreeNode* parent;
 			int key;
 
-			TreeNode(const int& _key, TreeNode* _left = nullptr, TreeNode* _right = nullptr) {
-				key = _key;
+			TreeNode(const int& _key, TreeNode* _left = nullptr, TreeNode* _right = nullptr, TreeNode* _parent = nullptr) {
 				left = _left;
 				right = _right;
+				parent = _parent;
+				key = _key;
 			}
 		};
 
@@ -34,25 +36,62 @@ namespace mysearchtree {
 			else return;
 		}
 
-		void delete_all(TreeNode* tn) {
-			if (tn != nullptr) {
-				delete_all(tn->left);
-				delete_all(tn->right);
-				delete(tn);
+		void erase_all(TreeNode* start_point) {
+			if (start_point != nullptr) {
+				while (start_point->left != nullptr) {
+					erase(start_point->left->key);
+				}
+					
+				while (start_point->right != nullptr) {
+					erase(start_point->right->key);
+				}
+
+				erase(start_point->key);
 			}
 			else return;
 		}
 
 		void insert_all(const TreeNode* tn) {
 			if (tn != nullptr) {
+				this->insert(tn->key);
 				insert_all(tn->left);
-				insert(tn->key);
 				insert_all(tn->right);
 			}
 			else return;
 		}
 
 	public:
+
+		SearchTree() : size(0), root(nullptr) {};
+
+		SearchTree(const SearchTree & st) {
+			erase_all(root);
+			insert_all(st.root);
+		}
+
+		~SearchTree() {
+			erase_all(root);
+			root = nullptr;
+			size = 0;
+		}
+		
+		SearchTree& operator=(const SearchTree & rhs) {
+			if (this == &rhs) {
+				return *this;
+			}
+
+			erase_all(root);
+			insert_all(rhs.root);
+			return *this;
+		}
+		
+		int get_size() const {
+			return size;
+		}
+
+		void print_all() const {
+			print_all(this->root);
+		}
 
 		bool contains(const int& key) const {
 			TreeNode* iter = root;
@@ -72,35 +111,47 @@ namespace mysearchtree {
 		}
 
 		bool insert(const int& key) {
-			TreeNode* iter = root;
 
-			while (iter != nullptr)
+			TreeNode* iter = nullptr;
+			TreeNode* next_node = root;
+			while (next_node != nullptr)
 			{
+				iter = next_node;
 				if (key < iter->key) {
-					iter = iter->left;
+					next_node = iter->left;
 				}
 				else if (key > iter->key) {
-					iter = iter->right;
+					next_node = iter->right;
 				}
 				else if (key == iter->key) {
 					return false;
 				}
 			}
 
+			next_node = new TreeNode(key);
+			if (root == nullptr) {
+				root = next_node;
+			}
+			else {
+				if (key > iter->key) {
+					iter->right = next_node;
+				}
+				else iter->left = next_node;
+
+				next_node->parent = iter;
+			}
 			size += 1;
-			iter = new TreeNode(key);
 			return true;
 		}
 
-		void insert_all(int* arr, int n) {
+		void insert_all(int* key_arr, int n) {
 			for (int i = 0; i < n; i++) {
-				this->insert(arr[i]);
+				this->insert(key_arr[i]);
 			}
 		}
 
 		bool erase(const int& key) {
 			TreeNode* iter = root;
-			TreeNode* parent = root;
 			while (iter != nullptr)
 			{
 				if (key == iter->key) {
@@ -108,29 +159,17 @@ namespace mysearchtree {
 					if (iter->left != nullptr && iter->right != nullptr) {
 						TreeNode* to_delete = iter;
 
-						TreeNode* leaf_parent = iter;
-						iter = iter->right;
 						//Finding the element that stands directly next in ascending order
+						iter = iter->right;
 						while (iter->left != nullptr)
 						{
-							leaf_parent = iter;
 							iter = iter->left;
 						}
-						//Checking if iter has right child node and handling this
-						if (iter->right != nullptr) {
-							leaf_parent->left = iter->right;
-							iter->right = nullptr;
-						}
-						//Inserting node in old one`s place
-						if (to_delete->key < parent->key) {
-							parent->right = iter;
-						}
-						else parent->left = iter;
 
-						iter->left = to_delete->left;
-						iter->right = to_delete->right;
-
-						delete(to_delete);
+						//Inserting successor in old one`s place
+						int new_key = iter->key;
+						erase(iter->key);
+						to_delete->key = new_key;
 						return true;
 					}
 					//Only 1 child node
@@ -141,32 +180,38 @@ namespace mysearchtree {
 						}
 						else child = iter->right;
 
-						if (parent->key < key) {
-							parent->right = child;
+						child->parent = iter->parent;
+
+						if (iter->parent->key < key) {
+							iter->parent->right = child;
+							
 						}
-						else parent->left = child;
+						else iter->parent->left = child;
 
 						delete(iter);
-						return true;
 					}
 					//It is a leaf, no "child" nodes
 					else {
-						if (key > parent->key) {
-							parent->right = nullptr;
+						if (iter == root)
+						{
+							root = nullptr;
 						}
-						else parent->left = nullptr;
+						else if (iter->parent->key < key) {
+							iter->parent->right = nullptr;
+						} 
+						else iter->parent->left = nullptr;
+
 						delete(iter);
 					}
+
 					size -= 1;
 					return true;
 				}
 				else {
 					if (key < iter->key) {
-						parent = iter;
 						iter = iter->left;
 					}
 					else {
-						parent = iter;
 						iter = iter->right;
 					}
 				}
@@ -174,35 +219,7 @@ namespace mysearchtree {
 			return false;
 		}
 
-		SearchTree() = default;
 
-		SearchTree(const SearchTree& st) {
-			size = st.size;
-			insert_all(st.root);
-		}
-
-		~SearchTree() {
-			delete_all(root);
-			root = nullptr;
-		}
-
-		SearchTree& operator=(const SearchTree& rhs) {
-			if (this == &rhs) {
-				return *this;
-			}
-
-			this->~SearchTree();
-			*this = SearchTree(rhs);
-			return *this;
-		}
-
-		int get_size() const {
-			return size;
-		}
-
-		void print_all() const {
-			print_all(this->root);
-		}
 	};
 
 }

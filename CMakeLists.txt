@@ -33,7 +33,7 @@ FetchContent_MakeAvailable(googletest)
 # Объявляем библиотеку
 add_library(main-v1 SHARED
     "include/SearchTree.h"
-    "AISD-2.cpp")
+    "Functions.cpp")
 target_include_directories(main-v1 PUBLIC "include")
 
 add_executable(main-v1-tests
